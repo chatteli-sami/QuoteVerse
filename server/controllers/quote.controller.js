@@ -103,3 +103,58 @@ export const likeQuote = async (req, res) => {
         res.status(400).json({ message: error.message });
     }
 }
+
+export const searchQuotes = async (req, res) => {
+    try {
+        const { search } = req.query;
+        if (!search) {
+            return res.status(400).json({ message: "Search query is required" });
+        }
+
+        const quotes = await Quote.find({
+            $or: [
+                { text: { $regex: search, $options: 'i' } },
+                { author: { $regex: search, $options: 'i' } },
+                { category: { $regex: search, $options: 'i' } }
+            ]
+        });
+
+        res.status(200).json({ quotes });
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+};
+
+export const getQuotesByUser = async (req, res) => {
+    try {
+        const userId = req.params.id;
+        const quotes = await Quote.find({ createdBy: userId }).populate('createdBy', 'username profileImageUrl').populate('likes', 'username profileImageUrl');
+
+        if (quotes.length === 0) {
+            return res.status(404).json({ message: "No quotes found for this user" });
+        }
+
+        res.status(200).json(quotes);
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+}
+
+export const getFavoriteQuotesbyUser = async (req, res) => {
+    try {
+        const userId = req.user._id; // Use authenticated user's ID
+        const user = await User.findById(userId).populate('favoriteQuotes');
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        if (user.favoriteQuotes.length === 0) {
+            return res.status(404).json({ message: "No favorite quotes found for this user" });
+        }
+
+        res.status(200).json(user.favoriteQuotes);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}

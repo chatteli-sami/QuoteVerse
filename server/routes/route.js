@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createQuote, getQuotes, OneQuote, updateQuote, deleteQuote, likeQuote } from "../controllers/quote.controller.js";
+import { createQuote, getQuotes, OneQuote, updateQuote, deleteQuote, likeQuote, getFavoriteQuotesbyUser, searchQuotes, getQuotesByUser } from "../controllers/quote.controller.js";
 import { register, login, logout, checkAuth, getUserById, updateUser, addFavoriteQuote, removeFavoriteQuote } from "../controllers/user.controller.js";
 import { authenticate } from "../middleware/auth.js"; // Import your auth middleware
 
@@ -21,5 +21,9 @@ router.route("/quotes/:id").get(OneQuote);
 router.route("/quotes/:id").put(authenticate, updateQuote); // Protected
 router.route("/quotes/:id").delete(authenticate, deleteQuote); // Protected
 router.route("/quotes/:id/like").post(authenticate, likeQuote); // Protected
+router.route("/quotes/search").get(searchQuotes); // Public
+router.route("/quotes/user/:userId").get(authenticate, getQuotesByUser); // Protected
+router.route("/quotes/favorites").get(authenticate, getFavoriteQuotesbyUser); // Protected
+
 
 export default router;

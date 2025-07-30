@@ -1,0 +1,12 @@
+.galaxy-container {
+  background: #000000;      /* Deep dark blue */
+  border-radius: 0;
+  box-shadow: none;
+  overflow: hidden;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+}
