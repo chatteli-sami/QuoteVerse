@@ -1,0 +1,105 @@
+import Quote from "../models/quote.model.js";
+import User from "../models/user.model.js";
+
+export const createQuote = async (req, res) => {
+    try {
+        const { text, author, category, imgUrl } = req.body;
+        const createdBy = req.user._id;
+
+        const newQuote = await Quote.create({ text, author, category, imgUrl, createdBy });
+        
+        // Add the quote to the user's favoriteQuotes
+        await User.findByIdAndUpdate(createdBy, { $push: { favoriteQuotes: newQuote._id } });
+
+        res.status(201).json(newQuote);
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+}
+
+export const getQuotes = async (req, res) => {
+    try {
+        const quotes = await Quote.find().populate('createdBy', 'username profileImageUrl').populate('likes', 'username profileImageUrl');
+        res.status(200).json(quotes);
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+}
+
+export const OneQuote = async (req, res) => {
+    try {
+        const quote = await Quote.findById(req.params.id).populate('createdBy', 'username profileImageUrl').populate('likes', 'username profileImageUrl');
+        if (!quote) {
+            return res.status(404).json({ message: "Quote not found" });
+        }
+        res.status(200).json(quote);
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+}
+
+export const updateQuote = async (req, res) => {
+    try {
+        const { text, author, category, imgUrl } = req.body;
+        const updatedQuote = await Quote.findByIdAndUpdate(
+            req.params.id,
+            { text, author, category, imgUrl },
+            { new: true }
+        );
+
+        if (!updatedQuote) {
+            return res.status(404).json({ message: "Quote not found" });
+        }
+
+        res.status(200).json(updatedQuote);
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+}
+
+export const deleteQuote = async (req, res) => {
+    try {
+        const deletedQuote = await Quote.findByIdAndDelete(req.params.id);
+        if (!deletedQuote) {
+            return res.status(404).json({ message: "Quote not found" });
+        }
+
+        // Remove the quote from the user's favoriteQuotes
+        await User.updateMany(
+            { favoriteQuotes: deletedQuote._id },
+            { $pull: { favoriteQuotes: deletedQuote._id } }
+        );
+
+        res.status(200).json({ message: "Quote deleted successfully" });
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+}
+
+export const likeQuote = async (req, res) => {
+    try {
+        const quoteId = req.params.id;
+        const userId = req.user._id;
+
+        const quote = await Quote.findById(quoteId);
+        if (!quote) {
+            return res.status(404).json({ message: "Quote not found" });
+        }
+
+        const alreadyLiked = quote.likes.includes(userId);
+
+        if (alreadyLiked) {
+            // Remove like
+            quote.likes.pull(userId);
+            await quote.save();
+            return res.status(200).json({ message: "Quote unliked successfully", quote });
+        } else {
+            // Add like
+            quote.likes.push(userId);
+            await quote.save();
+            return res.status(200).json({ message: "Quote liked successfully", quote });
+        }
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+}
