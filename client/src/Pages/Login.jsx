@@ -24,7 +24,7 @@ const Login = () => {
     setError('');
     setSuccess('');
     try {
-      const res = await axios.post('http://localhost:8000/login', form, { withCredentials: true });
+      const res = await axios.post('http://localhost:8000/api/login', form, { withCredentials: true });
       setSuccess('Login successful!');
       navigate('/dashboard');
       // Redirect or handle login here

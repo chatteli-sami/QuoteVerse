@@ -11,6 +11,7 @@ import UpdateQuotes from './Pages/UpdateQuotes';
 import EditProfile from './Pages/EditProfile';
 import MyQuotes from './Pages/MyQuotes';
 import FavoriteQuotes from './Pages/FavoriteQuotes';
+import AboutQuoteVerse from './Pages/AboutQuoteVerse';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 const App = () => {
@@ -27,8 +28,9 @@ const App = () => {
         <Route path="/search" element={<Search />} />
         <Route path="/update-quote/:id" element={<UpdateQuotes />} />
         <Route path="/edit-profile" element={<EditProfile />} />
-        <Route path="/my-quotes" element={<MyQuotes />} />
-        <Route path="/favorite-quotes" element={<FavoriteQuotes />} />
+        <Route path="/myquotes" element={<MyQuotes />} />
+        <Route path="/favorites" element={<FavoriteQuotes />} />
+        <Route path="/about" element={<AboutQuoteVerse />} />
       </Routes>
     </BrowserRouter>
   )

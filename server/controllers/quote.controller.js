@@ -105,40 +105,55 @@ export const likeQuote = async (req, res) => {
 }
 
 export const searchQuotes = async (req, res) => {
-    try {
-        const { search } = req.query;
-        if (!search) {
-            return res.status(400).json({ message: "Search query is required" });
-        }
+  try {
+    const { search } = req.query;
 
-        const quotes = await Quote.find({
-            $or: [
-                { text: { $regex: search, $options: 'i' } },
-                { author: { $regex: search, $options: 'i' } },
-                { category: { $regex: search, $options: 'i' } }
-            ]
-        });
-
-        res.status(200).json({ quotes });
-    } catch (error) {
-        res.status(400).json({ message: error.message });
+    if (!search || typeof search !== 'string' || !search.trim()) {
+      return res.status(400).json({ message: "Search query must be a non-empty string." });
     }
+
+    const sanitizedSearch = search.trim();
+
+    console.log(`[Search API] Search term: "${sanitizedSearch}"`);
+
+    const regex = new RegExp(sanitizedSearch, 'i');
+
+    const quotes = await Quote.find({
+      $or: [
+        { text: regex },
+        { author: regex },
+        { category: regex }
+      ]
+    });
+
+    res.status(200).json({
+      quotes,
+      message: quotes.length === 0 ? "No quotes found." : "Quotes retrieved successfully."
+    });
+  } catch (error) {
+    console.error('[Search Error]', error.message);
+    res.status(500).json({ message: "An error occurred while searching for quotes." });
+  }
 };
 
+
 export const getQuotesByUser = async (req, res) => {
-    try {
-        const userId = req.params.id;
-        const quotes = await Quote.find({ createdBy: userId }).populate('createdBy', 'username profileImageUrl').populate('likes', 'username profileImageUrl');
+  try {
+    const userId = req.params.id;
 
-        if (quotes.length === 0) {
-            return res.status(404).json({ message: "No quotes found for this user" });
-        }
+    // Fetch quotes and populate related fields
+    const quotes = await Quote.find({ createdBy: userId })
+      .populate('createdBy', 'username profileImageUrl')
+      .populate('likes', 'username profileImageUrl');
 
-        res.status(200).json(quotes);
-    } catch (error) {
-        res.status(400).json({ message: error.message });
-    }
-}
+    // Wrap response to match frontend structure: res.data.quotes
+    res.status(200).json({ quotes });
+  } catch (error) {
+    console.error('[getQuotesByUser] Error:', error);
+    res.status(500).json({ quotes: [], message: 'Failed to fetch quotes' });
+  }
+};
+
 
 export const getFavoriteQuotesbyUser = async (req, res) => {
     try {
@@ -157,4 +172,22 @@ export const getFavoriteQuotesbyUser = async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
+};
+
+export const toggleFavorite = async (req, res) => {
+        try {
+            const quote = await Quote.findById(req.params.id);
+            if (!quote) {
+                return res.status(404).json({ error: "Quote not found" });
+            }
+
+            quote.isFavorite = !quote.isFavorite;
+            await quote.save();
+
+            res.status(200).json({ msg: "Image favorite status updated", quote });
+        } catch (err) {
+            console.error("Error toggling favorite:", err);
+            res.status(500).json({ error: "Failed to update favorite status" });
+        }
 }
+

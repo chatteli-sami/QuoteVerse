@@ -10,12 +10,11 @@ const Profile = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Get current user id from auth check
-    axios.get('http://localhost:8000/check-auth', { withCredentials: true })
+    axios.get('http://localhost:8000/api/check-auth', { withCredentials: true })
       .then(res => {
         const userId = res.data.user?._id || res.data._id;
         if (userId) {
-          axios.get(`http://localhost:8000/user/${userId}`, { withCredentials: true })
+          axios.get(`http://localhost:8000/api/user/${userId}`, { withCredentials: true })
             .then(res2 => setUser(res2.data.user || res2.data))
             .catch(() => setError('Failed to load user details'));
         } else {
@@ -27,7 +26,7 @@ const Profile = () => {
 
   const handleLogout = async () => {
     try {
-      await axios.post('http://localhost:8000/logout', {}, { withCredentials: true });
+      await axios.post('http://localhost:8000/api/logout', {}, { withCredentials: true });
       navigate('/signin');
     } catch {
       setError('Logout failed');
@@ -51,7 +50,7 @@ const Profile = () => {
           left: '50%',
           transform: 'translate(-50%, -50%)',
           width: '100%',
-          maxWidth: '520px',
+          maxWidth: '650px', // Larger card
           zIndex: 2,
         }}
       >
@@ -73,40 +72,42 @@ const Profile = () => {
         {user && (
           <div
             style={{
-              background: 'rgba(0,0,0,0.7)',
-              borderRadius: '24px',
-              boxShadow: '0 4px 32px #00bcd4',
-              padding: '32px 24px',
+              background: 'rgba(0,0,0,0.75)',
+              borderRadius: '32px',
+              boxShadow: '0 8px 48px #00bcd4',
+              padding: '48px 40px',
               color: '#fff',
               fontFamily: "'Montserrat', 'Poppins', sans-serif",
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               position: 'relative',
+              minHeight: '420px',
             }}
           >
             <img
               src={user.profileImageUrl}
               alt="Profile"
               style={{
-                width: '120px',
-                height: '120px',
+                width: '150px',
+                height: '150px',
                 borderRadius: '50%',
                 objectFit: 'cover',
-                marginBottom: '18px',
-                boxShadow: '0 2px 12px #00bcd4',
+                marginBottom: '24px',
+                boxShadow: '0 2px 16px #00bcd4',
+                border: '4px solid #00bcd4',
               }}
             />
-            <div style={{ fontSize: '1.5rem', fontWeight: 600, marginBottom: '8px' }}>
+            <div style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '10px' }}>
               {user.firstName} {user.lastName}
             </div>
-            <div style={{ fontSize: '1.1rem', opacity: 0.85, marginBottom: '18px' }}>
+            <div style={{ fontSize: '1.2rem', opacity: 0.85, marginBottom: '24px' }}>
               {user.email}
             </div>
-            {/* Left Buttons */}
+            {/* Right Buttons */}
             <div style={{
               position: 'absolute',
-              left: '-160px',
+              right: '-0px',
               top: '50%',
               transform: 'translateY(-50%)',
               display: 'flex',
@@ -114,38 +115,24 @@ const Profile = () => {
               gap: '18px',
             }}>
               <button
-                onClick={() => navigate('/favorites')}
-                style={{
-                  padding: '10px 24px',
-                  borderRadius: '12px',
-                  border: 'none',
-                  background: 'linear-gradient(90deg,#00bcd4,#2196f3)',
-                  color: '#fff',
-                  fontWeight: 700,
-                  fontSize: '1.1rem',
-                  cursor: 'pointer',
-                  fontFamily: "'Montserrat', 'Poppins', sans-serif",
-                  boxShadow: '0 2px 16px #00bcd4',
-                }}
-              >
-                Favorites
-              </button>
-              <button
                 onClick={() => navigate('/myquotes')}
                 style={{
-                  padding: '10px 24px',
+                  padding: '10px 18px',
                   borderRadius: '12px',
                   border: 'none',
                   background: 'linear-gradient(90deg,#00bcd4,#2196f3)',
                   color: '#fff',
                   fontWeight: 700,
-                  fontSize: '1.1rem',
+                  fontSize: '1rem',
                   cursor: 'pointer',
                   fontFamily: "'Montserrat', 'Poppins', sans-serif",
-                  boxShadow: '0 2px 16px #00bcd4',
+                  boxShadow: '0 1x 6px #00bcd4',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
                 }}
               >
-                My Quotes
+                📝 My Quotes
               </button>
             </div>
             {/* Bottom Buttons */}
@@ -153,42 +140,65 @@ const Profile = () => {
               display: 'flex',
               gap: '24px',
               justifyContent: 'center',
-              marginTop: '32px',
+              marginTop: '48px',
             }}>
               <button
                 onClick={() => navigate('/edit-profile')}
                 style={{
-                  padding: '10px 24px',
+                  padding: '10px 18px',
                   borderRadius: '12px',
                   border: 'none',
                   background: 'linear-gradient(90deg,#2196f3,#00bcd4)',
                   color: '#fff',
                   fontWeight: 700,
-                  fontSize: '1.1rem',
+                  fontSize: '1rem',
                   cursor: 'pointer',
                   fontFamily: "'Montserrat', 'Poppins', sans-serif",
-                  boxShadow: '0 2px 16px #2196f3',
+                  boxShadow: '0 2px 12px #2196f3',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
                 }}
               >
-                Edit Profile
+                ✏️ Edit Profile
               </button>
               <button
                 onClick={handleLogout}
                 style={{
-                  padding: '10px 24px',
+                  padding: '10px 18px',
                   borderRadius: '12px',
                   border: 'none',
                   background: 'linear-gradient(90deg,#ff5252,#ff9800)',
                   color: '#fff',
                   fontWeight: 700,
-                  fontSize: '1.1rem',
+                  fontSize: '1rem',
                   cursor: 'pointer',
                   fontFamily: "'Montserrat', 'Poppins', sans-serif",
-                  boxShadow: '0 2px 16px #ff5252',
+                  boxShadow: '0 2px 12px #ff5252',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
                 }}
               >
-                Logout
+                🚪 Logout
               </button>
+            </div>
+            {/* Back to Dashboard Link */}
+            <div style={{ marginTop: '38px' }}>
+              <span
+                style={{
+                  color: '#00bcd4',
+                  cursor: 'pointer',
+                  textDecoration: 'underline',
+                  fontWeight: 600,
+                  fontFamily: "'Montserrat', 'Poppins', sans-serif",
+                  fontSize: '1.15rem',
+                  opacity: 0.85,
+                }}
+                onClick={() => navigate('/dashboard')}
+              >
+                ← Back to Dashboard
+              </span>
             </div>
           </div>
         )}

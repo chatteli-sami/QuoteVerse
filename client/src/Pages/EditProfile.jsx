@@ -16,12 +16,12 @@ const EditProfile = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get('http://localhost:8000/check-auth', { withCredentials: true })
+    axios.get('http://localhost:8000/api/check-auth', { withCredentials: true })
       .then(res => {
         const id = res.data.user?._id || res.data._id;
         setUserId(id);
         if (id) {
-          axios.get(`http://localhost:8000/user/${id}`, { withCredentials: true })
+          axios.get(`http://localhost:8000/api/user/${id}`, { withCredentials: true })
             .then(res2 => {
               const user = res2.data.user || res2.data;
               setForm({
@@ -49,7 +49,7 @@ const EditProfile = () => {
       return;
     }
     try {
-      await axios.put(`http://localhost:8000/user/update/${userId}`, form, { withCredentials: true });
+      await axios.put(`http://localhost:8000/api/user/update/${userId}`, form, { withCredentials: true });
       setSuccess('Profile updated successfully!');
       setTimeout(() => navigate('/profile'), 1200);
     } catch (err) {

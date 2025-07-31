@@ -8,45 +8,46 @@ const OneQuote = () => {
   const { id } = useParams();
   const [quote, setQuote] = useState(null);
   const [error, setError] = useState('');
-  const [favLoading, setFavLoading] = useState(false);
-  const [removeLoading, setRemoveLoading] = useState(false);
+  const [isFavorited, setIsFavorited] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
   const [success, setSuccess] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get(`http://localhost:8000/quotes/${id}`)
+    axios.get(`http://localhost:8000/api/quotes/${id}`)
       .then(res => setQuote(res.data.quote || res.data))
       .catch(() => setError('Failed to load quote'));
   }, [id]);
 
-  const handleAddFavorite = async () => {
-    setFavLoading(true);
-    setError('');
-    setSuccess('');
-    try {
-      await axios.post(`http://localhost:8000/user/favorite-quote/add/${id}`, {}, { withCredentials: true });
-      setSuccess('Added to favorites!');
-    } catch (err) {
-      setError(err.response?.data?.message || 'Failed to add to favorites');
-    }
-    setFavLoading(false);
+  const handleFavorite = () => {
+    axios.patch(`http://localhost:8000/api/quotes/${id}/favorite`)
+      .then(() => {
+        alert('Quote marked as favorite!');
+        setIsFavorited(true);
+      })
+      .catch(err => {
+        console.error('Failed to favorite Quote:', err);
+        alert('Favorite action failed.');
+      });
   };
 
-  const handleRemoveFavorite = async () => {
-    setRemoveLoading(true);
+  const handleDeleteQuote = async () => {
+    if (!window.confirm('Are you sure you want to delete this quote?')) return;
+    setDeleteLoading(true);
     setError('');
     setSuccess('');
     try {
-      await axios.post(`http://localhost:8000/user/favorite-quote/remove/${id}`, {}, { withCredentials: true });
-      setSuccess('Removed from favorites!');
+      await axios.delete(`http://localhost:8000/api/quotes/${id}`, { withCredentials: true });
+      setSuccess('Quote deleted successfully!');
+      setTimeout(() => navigate('/dashboard'), 1500);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to remove from favorites');
+      setError(err.response?.data?.message || 'Failed to delete quote');
     }
-    setRemoveLoading(false);
+    setDeleteLoading(false);
   };
 
   return (
-    <div style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden' }}>
+    <div style={{ width: '100vw', height: '150vh', position: 'relative', overflow: 'auto' }}>
       <Galaxy 
         mouseRepulsion={false}
         mouseInteraction={false}
@@ -72,6 +73,7 @@ const OneQuote = () => {
             fontSize: '3rem',
             fontWeight: 700,
             color: '#fff',
+            marginLeft:'600px',
             marginBottom: '32px',
             letterSpacing: '0.05em',
             textShadow: '0 4px 32px #000',
@@ -87,12 +89,13 @@ const OneQuote = () => {
               background: 'rgba(0,0,0,0.7)',
               borderRadius: '18px',
               boxShadow: '0 2px 16px #00bcd4',
-              padding: '28px 32px',
-              maxWidth: '500px',
+              padding: '40px 48px',
+              maxWidth: '680px',
               margin: '0 auto',
               color: '#fff',
               fontFamily: "'Montserrat', 'Poppins', sans-serif",
               position: 'relative',
+              lineHeight: '1.6',
             }}
           >
             <div style={{ fontSize: '1.5rem', fontWeight: 600, marginBottom: '12px' }}>
@@ -116,62 +119,60 @@ const OneQuote = () => {
                 }}
               />
             )}
-            <div style={{ display: 'flex', gap: '18px', justifyContent: 'center', marginTop: '18px' }}>
+            <div style={{ display: 'flex', gap: '18px', justifyContent: 'center', marginTop: '18px', flexWrap: 'wrap' }}>
               <button
-                onClick={handleAddFavorite}
-                disabled={favLoading}
+                onClick={handleFavorite}
+                disabled={isFavorited}
                 style={{
-                  padding: '10px 24px',
-                  borderRadius: '12px',
-                  border: 'none',
-                  background: 'linear-gradient(90deg,#00bcd4,#2196f3)',
-                  color: '#fff',
-                  fontWeight: 700,
-                  fontSize: '1.1rem',
-                  cursor: 'pointer',
-                  fontFamily: "'Montserrat', 'Poppins', sans-serif",
-                  boxShadow: '0 2px 16px #00bcd4',
-                  opacity: favLoading ? 0.6 : 1,
-                }}
+  padding: '8px 16px',
+  borderRadius: '10px',
+  border: 'none',
+  background: isFavorited ? '#555' : '#007BFF', // adjust per button
+  color: '#fff',
+  fontWeight: 600,
+  fontSize: '0.95rem',
+  cursor: 'pointer',
+  fontFamily: "'Montserrat', 'Poppins', sans-serif",
+  boxShadow: '0 2px 10px #00bcd4',
+}}
               >
-                Add to Favorites
+                {isFavorited ? '❤️ Favorited' : '💙 Favorite This Quote'}
               </button>
-              <button
-                onClick={handleRemoveFavorite}
-                disabled={removeLoading}
-                style={{
-                  padding: '10px 24px',
-                  borderRadius: '12px',
-                  border: 'none',
-                  background: 'linear-gradient(90deg,#ff5252,#ff9800)',
-                  color: '#fff',
-                  fontWeight: 700,
-                  fontSize: '1.1rem',
-                  cursor: 'pointer',
-                  fontFamily: "'Montserrat', 'Poppins', sans-serif",
-                  boxShadow: '0 2px 16px #ff5252',
-                  opacity: removeLoading ? 0.6 : 1,
-                }}
-              >
-                Remove from Favorites
-              </button>
-              {/* Edit Quote Button */}
               <button
                 onClick={() => navigate(`/update-quote/${quote._id}`)}
                 style={{
-                  padding: '10px 24px',
-                  borderRadius: '12px',
+                  padding: '8px 16px',
+                  borderRadius: '10px',
                   border: 'none',
                   background: 'linear-gradient(90deg,#2196f3,#00bcd4)',
                   color: '#fff',
                   fontWeight: 700,
-                  fontSize: '1.1rem',
+                  fontSize: '0.95rem',
                   cursor: 'pointer',
                   fontFamily: "'Montserrat', 'Poppins', sans-serif",
-                  boxShadow: '0 2px 16px #2196f3',
+                  boxShadow: '0 2px 10px #2196f3',
                 }}
               >
                 Edit Quote
+              </button>
+              <button
+                onClick={handleDeleteQuote}
+                disabled={deleteLoading}
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: '10px',
+                  border: 'none',
+                  background: 'linear-gradient(90deg,#f44336,#e91e63)',
+                  color: '#fff',
+                  fontWeight: 700,
+                  fontSize: '0.95rem',
+                  cursor: 'pointer',
+                  fontFamily: "'Montserrat', 'Poppins', sans-serif",
+                  boxShadow: '0 2px 10px #f44336',
+                  opacity: deleteLoading ? 0.6 : 1,
+                }}
+              >
+                Delete Quote
               </button>
             </div>
           </div>

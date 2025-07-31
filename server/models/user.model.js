@@ -29,10 +29,6 @@ const UserSchema = new Schema(
             required: [true, "Password required!"],
             minlength: [8, "Password must be 8 characters or longer"]
         },
-        favoriteQuotes: [{
-            type: Schema.Types.ObjectId,
-            ref: 'Quote'
-        }],
         likedQuotes: [{
             type: Schema.Types.ObjectId,
             ref: 'Quote'

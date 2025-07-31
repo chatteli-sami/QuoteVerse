@@ -11,17 +11,33 @@ const Search = () => {
   const navigate = useNavigate();
 
   const handleSearch = async e => {
-    e.preventDefault();
-    setError('');
-    setResults([]);
-    if (!query.trim()) return;
-    try {
-      const res = await axios.get(`http://localhost:8000/quotes/search?search=${encodeURIComponent(query)}`);
-      setResults(res.data.quotes || []);
-    } catch {
-      setError('Failed to search quotes');
+  e.preventDefault();
+  const trimmedQuery = query.trim();
+
+  if (!trimmedQuery) {
+    setError('Please enter a valid search term.');
+    return;
+  }
+
+  setError('');
+  setResults([]);
+
+  try {
+    const res = await axios.post(`http://localhost:8000/api/quotes/search?search=${encodeURIComponent(trimmedQuery)}`);
+
+    if (res.data.quotes?.length > 0) {
+      setResults(res.data.quotes);
+    } else {
+      setError(res.data.message || 'No quotes found.');
     }
-  };
+  } catch (err) {
+    const msg = err?.response?.data?.message || 'Failed to search quotes.';
+    console.error('[Search.jsx Error]', msg);
+    setError(msg);
+  }
+};
+
+
 
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden' }}>
@@ -50,6 +66,7 @@ const Search = () => {
           fontWeight: 700,
           color: '#fff',
           marginBottom: '32px',
+          marginLeft:'200px',
           letterSpacing: '0.05em',
           textShadow: '0 4px 32px #000',
           textAlign: 'center'

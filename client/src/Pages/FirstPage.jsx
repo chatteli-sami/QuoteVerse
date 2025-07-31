@@ -12,7 +12,7 @@ const FirstPage = () => {
     };
 
     const handleGetStarted = () => {
-        navigate('/dashboard');
+        navigate('/signin');
     };
 
     return (
@@ -49,14 +49,14 @@ const FirstPage = () => {
                 {/* Right: Links */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '48px' }}>
                     <a href="/" style={{ color: '#fff', fontSize: '1.2rem', textDecoration: 'none', fontWeight: 500 }}>Home</a>
-                    <a href="#about" style={{ color: '#fff', fontSize: '1.2rem', textDecoration: 'none', fontWeight: 500 }}>About</a>
+                    <a href="/about" style={{ color: '#fff', fontSize: '1.2rem', textDecoration: 'none', fontWeight: 500 }}>About</a>
                     <a href="#service" style={{ color: '#fff', fontSize: '1.2rem', textDecoration: 'none', fontWeight: 500 }}>Service</a>
                 </div>
             </nav>
             {/* Main Content */}
             <Galaxy 
-                mouseRepulsion={false}
-                mouseInteraction={false}
+                mouseRepulsion={true}
+                mouseInteraction={true}
                 density={1.6}
                 glowIntensity={0.3}
                 saturation={0.8}

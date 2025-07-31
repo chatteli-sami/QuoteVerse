@@ -53,7 +53,7 @@ const Singup = () => {
     setError('');
     setSuccess('');
     try {
-      const res = await axios.post('http://localhost:8000/register', form, { withCredentials: true });
+      const res = await axios.post('http://localhost:8000/api/register', form, { withCredentials: true });
       setSuccess('Registration successful!');
       navigate('/dashboard');
     } catch (err) {

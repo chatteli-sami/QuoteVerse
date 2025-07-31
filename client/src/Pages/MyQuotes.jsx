@@ -11,21 +11,42 @@ const MyQuotes = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get('http://localhost:8000/check-auth', { withCredentials: true })
-      .then(res => {
-        const id = res.data.user?._id || res.data._id;
+  axios.get('http://localhost:8000/api/check-auth', { withCredentials: true })
+    .then(res => {
+      const id = res.data.user?._id || res.data._id;
+      if (id) {
+        console.log('Authenticated user ID:', id);
         setUserId(id);
-        if (id) {
-          axios.get(`http://localhost:8000/quotes/user/${id}`, { withCredentials: true })
-            .then(res2 => setQuotes(res2.data.quotes || []))
-            .catch(() => setError('Failed to load your quotes'));
-        }
-      })
-      .catch(() => setError('Not authenticated'));
-  }, []);
+      } else {
+        setError('User ID not found');
+      }
+    })
+    .catch(err => {
+      console.error('Authentication error:', err);
+      setError('Not authenticated');
+    });
+}, []);
+
+useEffect(() => {
+  if (!userId) return;
+  axios.get(`http://localhost:8000/api/quotes/user/${userId}`, { withCredentials: true })
+    .then(res => {
+      console.log('Fetched quotes:', res.data.quotes);
+      if (Array.isArray(res.data.quotes)) {
+        setQuotes(res.data.quotes);
+      } else {
+        setError('Quote data not returned as array');
+      }
+    })
+    .catch(err => {
+      console.error('Quote fetch error:', err);
+      setError('Failed to load your quotes');
+    });
+}, [userId]);
+
 
   return (
-    <div style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden' }}>
+    <div style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'auto' }}>
       <Galaxy 
         mouseRepulsion={false}
         mouseInteraction={false}
@@ -116,4 +137,4 @@ const MyQuotes = () => {
   );
 };
 
-export default MyQuotes
+export default MyQuotes;

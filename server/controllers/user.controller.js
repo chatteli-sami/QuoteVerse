@@ -171,8 +171,9 @@ export const getUserById = async (req, res) => {
 export const updateUser = async (req, res) => {
     const userId = req.params.id;
     try {
-        // Prevent password update here for security
-        const { password, ...updateData } = req.body;
+        // Only allow specific fields to be updated
+        const { firstName, lastName, profileImageUrl } = req.body;
+        const updateData = { firstName, lastName, profileImageUrl };
 
         const updatedUser = await User.findByIdAndUpdate(
             userId,
@@ -201,56 +202,3 @@ export const updateUser = async (req, res) => {
     }
 }
 
-export const addFavoriteQuote = async (req, res) => {
-    const userId = req.user._id; // Use authenticated user's ID
-    const quoteId = req.body.quoteId;
-
-    try {
-        const user = await User.findById(userId);
-        if (!user) {
-            return res.status(404).json({ message: "User not found" });
-        }
-
-        const quote = await Quote.findById(quoteId);
-        if (!quote) {
-            return res.status(404).json({ message: "Quote not found" });
-        }
-
-        if (user.favoriteQuotes.includes(quoteId)) {
-            return res.status(400).json({ message: "Quote already in favorites" });
-        }
-
-        user.favoriteQuotes.push(quoteId);
-        await user.save();
-
-        res.status(200).json({ message: "Quote added to favorites", user });
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-}
-
-export const removeFavoriteQuote = async (req, res) => {
-    const userId = req.user._id; // Use authenticated user's ID
-    const quoteId = req.body.quoteId;
-
-    try {
-        const user = await User.findById(userId);
-        if (!user) {
-            return res.status(404).json({ message: "User not found" });
-        }
-
-        if (!user.favoriteQuotes.includes(quoteId)) {
-            return res.status(400).json({ message: "Quote not in favorites" });
-        }
-
-        user.favoriteQuotes.pull(quoteId);
-        await user.save();
-
-        // Fetch updated user without password
-        const updatedUser = await User.findById(userId).select("-password");
-
-        res.status(200).json({ message: "Quote removed from favorites", user: updatedUser });
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-}

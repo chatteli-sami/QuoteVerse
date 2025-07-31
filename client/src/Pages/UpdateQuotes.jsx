@@ -35,7 +35,7 @@ const UpdateQuotes = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get(`http://localhost:8000/quotes/${id}`)
+    axios.get(`http://localhost:8000/api/quotes/${id}`)
       .then(res => {
         const quote = res.data.quote || res.data;
         setForm({
@@ -61,7 +61,7 @@ const UpdateQuotes = () => {
       return;
     }
     try {
-      await axios.put(`http://localhost:8000/quotes/${id}`, form, { withCredentials: true });
+      await axios.put(`http://localhost:8000/api/quotes/${id}`, form, { withCredentials: true });
       setSuccess('Quote updated successfully!');
       setTimeout(() => navigate('/dashboard'), 1200);
     } catch (err) {
@@ -99,6 +99,7 @@ const UpdateQuotes = () => {
             marginBottom: '32px',
             letterSpacing: '0.05em',
             textShadow: '0 4px 32px #000',
+            marginLeft:'595px',
           }}
         >
           <BlurText text="Update Quote" delay={75} animateBy="words" direction="top" />
@@ -111,7 +112,7 @@ const UpdateQuotes = () => {
             padding: '40px 32px',
             maxWidth: '340px',
             margin: '0 auto',
-            marginTop: '-30px',
+            marginTop: '45px',
             boxShadow: '0 4px 32px #00bcd4',
             display: 'flex',
             flexDirection: 'column',

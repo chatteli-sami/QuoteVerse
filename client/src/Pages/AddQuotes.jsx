@@ -46,7 +46,7 @@ const AddQuotes = () => {
       return;
     }
     try {
-      await axios.post('http://localhost:8000/quotes', form, { withCredentials: true });
+      await axios.post('http://localhost:8000/api/quotes', form, { withCredentials: true });
       setSuccess('Quote added successfully!');
       setTimeout(() => navigate('/dashboard'), 1200);
     } catch (err) {

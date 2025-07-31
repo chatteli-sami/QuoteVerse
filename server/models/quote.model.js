@@ -17,6 +17,10 @@ const QuoteSchema = new Schema({
     imgUrl:{
         type: String,
     },
+    favorites: [{
+        type: Boolean,
+        default: false,
+    }],
     createdBy:{
         type: Schema.Types.ObjectId,
         ref: "User",
@@ -25,7 +29,10 @@ const QuoteSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: "User",
     }]
-})
+}, {
+    timestamps: true,
+    versionKey: false,
+});
 
 const Quote = model("Quote", QuoteSchema);
 

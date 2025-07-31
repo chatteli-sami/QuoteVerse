@@ -8,29 +8,35 @@ const Dashboard = () => {
   const [quotes, setQuotes] = useState([]);
   const [likeLoading, setLikeLoading] = useState({});
   const [error, setError] = useState('');
+  const [userId, setUserId] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get('http://localhost:8000/quotes')
-      .then(res => setQuotes(res.data.quotes || []))
-      .catch(() => setError('Failed to load quotes'));
+    // Get userId for like/unlike logic
+    axios.get('http://localhost:8000/api/check-auth', { withCredentials: true })
+      .then(res => setUserId(res.data.user?._id || res.data._id))
+      .catch(() => setUserId(''));
+    axios.get('http://localhost:8000/api/all/quotes', { withCredentials: true })
+      .then(res => setQuotes(res.data))
+      .catch(err => console.error('Error fetching quotes:', err));
   }, []);
 
   const handleLike = async (id) => {
     setLikeLoading(l => ({ ...l, [id]: true }));
     try {
-      await axios.post(`http://localhost:8000/quotes/${id}/like`, {}, { withCredentials: true });
-      // Optionally, re-fetch quotes or update local state
-      const res = await axios.get('http://localhost:8000/quotes');
-      setQuotes(res.data.quotes || []);
+      const res = await axios.post(`http://localhost:8000/api/quotes/${id}/like`, {}, { withCredentials: true });
+      // Update the quote in local state
+      setQuotes(quotes =>
+        quotes.map(q => q._id === id ? res.data.quote : q)
+      );
     } catch {
-      setError('Failed to like quote');
+      setError('Failed to like/unlike quote');
     }
     setLikeLoading(l => ({ ...l, [id]: false }));
   };
 
   return (
-    <div style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden' }}>
+    <div style={{ width: '100vw', height: '150vh', position: 'relative', overflow: 'auto' }}>
       {/* Navbar */}
       <nav
         style={{
@@ -105,11 +111,13 @@ const Dashboard = () => {
         style={{
           position: 'absolute',
           top: '15%',
-          left: '36%',
+          left: '45%',
           transform: 'translateX(-50%)',
           width: '90vw',
           maxWidth: '900px',
           zIndex: 2,
+          height: 'auto', // Add this
+          overflowY: 'auto', // Add this
         }}
       >
         <h1 style={{
@@ -118,6 +126,7 @@ const Dashboard = () => {
           fontWeight: 700,
           color: '#fff',
           marginBottom: '32px',
+          marginLeft: '275px',
           letterSpacing: '0.05em',
           textShadow: '0 4px 32px #000',
           textAlign: 'center'
@@ -148,7 +157,7 @@ const Dashboard = () => {
                 color: '#fff',
                 fontFamily: "'Montserrat', 'Poppins', sans-serif",
                 position: 'relative',
-                cursor: 'pointer', // Make it clear it's clickable
+                cursor: 'pointer',
                 transition: 'box-shadow 0.2s',
               }}
             >
@@ -180,7 +189,7 @@ const Dashboard = () => {
                   opacity: likeLoading[q._id] ? 0.6 : 1,
                 }}
               >
-                {q.likes?.length || 0} {q.likes?.includes(/* userId */) ? 'Liked' : 'Like'}
+                {q.likes?.length || 0} {userId && q.likes?.includes(userId) ? 'Unlike' : 'Like'}
               </button>
             </div>
           ))}
